@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: rag-papers
+Version: 0.1.0
+Summary: RAG Research Paper Assistant (PDF RAG + citations)
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pymupdf==1.24.10
+Requires-Dist: sentence-transformers==3.0.1
+Requires-Dist: chromadb==0.5.5
+Requires-Dist: numpy==1.26.4
+Requires-Dist: tqdm==4.66.5
+Requires-Dist: python-dotenv==1.0.1
+Requires-Dist: ruff==0.6.3
+Requires-Dist: pytest==8.3.2
