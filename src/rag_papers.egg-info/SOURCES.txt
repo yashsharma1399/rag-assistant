@@ -2,7 +2,11 @@ README.md
 pyproject.toml
 src/rag_papers/__init__.py
 src/rag_papers/__main__.py
+src/rag_papers/chunking.py
 src/rag_papers/cli.py
+src/rag_papers/embeddings.py
+src/rag_papers/pdf_loader.py
+src/rag_papers/vector_store.py
 src/rag_papers.egg-info/PKG-INFO
 src/rag_papers.egg-info/SOURCES.txt
 src/rag_papers.egg-info/dependency_links.txt
