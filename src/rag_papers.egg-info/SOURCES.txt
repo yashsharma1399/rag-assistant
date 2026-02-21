@@ -2,6 +2,7 @@ README.md
 pyproject.toml
 src/rag_papers/__init__.py
 src/rag_papers/__main__.py
+src/rag_papers/answering.py
 src/rag_papers/chunking.py
 src/rag_papers/cli.py
 src/rag_papers/embeddings.py

@@ -20,6 +20,7 @@ What each command does:
    - Embeds the user question
    - Queries Chroma for top-k most similar chunks
    - Prints results with citations (pdf name + page number + chunk id)
+   - Builds a FREE extractive final answer (no LLM) from the retrieved chunks
 """
 
 # argparse = reads commands from the terminal (ingest, ask, --pdf-dir, etc.)
@@ -34,6 +35,9 @@ from rag_papers.chunking import chunk_pages, save_chunks_jsonl
 # Our modules for embeddings + vector DB
 from rag_papers.embeddings import load_embedding_model, embed_texts
 from rag_papers.vector_store import get_chroma_client, get_or_create_collection
+
+# NEW (Commit 6): Free extractive answering helpers (no LLM)
+from rag_papers.answering import RetrievedChunk, build_extractive_answer
 
 def main():
     # -----------------------------
@@ -265,16 +269,40 @@ def main():
             include=["documents", "metadatas", "distances"],
         )
 
+        # Chroma returns list-of-lists because it supports multiple queries at once.
+        # We asked only 1 question, so we take index 0.
         docs = results["documents"][0]
         metas = results["metadatas"][0]
         dists = results["distances"][0]
 
+        # ----------------------------
+        # 1) Print retrieved chunks
+        # ----------------------------
         print("\nTop results (with citations):")
         for i in range(len(docs)):
             pdf_name = metas[i].get("pdf_name", "unknown.pdf")
             page_number = metas[i].get("page_number", "?")
             preview = docs[i][:200].replace("\n", " ")
             print(f"{i+1}) [{pdf_name} p.{page_number}] (distance={dists[i]:.4f}) {preview}...")
+
+        # ----------------------------
+        # 2) FREE FINAL ANSWER (no LLM)
+        #    We build an extractive answer from the retrieved chunks.
+        # ----------------------------
+        retrieved_chunks = []
+        for i in range(len(docs)):
+            retrieved_chunks.append(
+                RetrievedChunk(
+                    text=docs[i],
+                    metadata=metas[i],
+                    distance=dists[i],
+                )
+            )
+
+        print("\nFinal answer (free, extractive):")
+        bullets = build_extractive_answer(question, retrieved_chunks, max_bullets=5)
+        for b in bullets:
+            print(b)
 
         return
 
