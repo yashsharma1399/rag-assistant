@@ -276,18 +276,7 @@ def main():
         dists = results["distances"][0]
 
         # ----------------------------
-        # 1) Print retrieved chunks
-        # ----------------------------
-        print("\nTop results (with citations):")
-        for i in range(len(docs)):
-            pdf_name = metas[i].get("pdf_name", "unknown.pdf")
-            page_number = metas[i].get("page_number", "?")
-            preview = docs[i][:200].replace("\n", " ")
-            print(f"{i+1}) [{pdf_name} p.{page_number}] (distance={dists[i]:.4f}) {preview}...")
-
-        # ----------------------------
-        # 2) FREE FINAL ANSWER (no LLM)
-        #    We build an extractive answer from the retrieved chunks.
+        # 0) Build RetrievedChunk objects once: (we'll use these for BOTH: clean previews + final answer)
         # ----------------------------
         retrieved_chunks = []
         for i in range(len(docs)):
@@ -299,6 +288,42 @@ def main():
                 )
             )
 
+        # ----------------------------
+        # 1) Print retrieved chunks (CLEANER preview)
+        #    - Instead of printing the first 200 chars of the raw chunk,
+        #      we print a "clean" preview using our extractive sentence logic.
+        #
+        #    Implementation:
+        #    - For each retrieved chunk, we ask build_extractive_answer() to extract
+        #      1 best bullet from ONLY that chunk.
+        #    - Then we remove the "- " bullet prefix to make it look like a preview line.
+        # ----------------------------
+        print("\nTop results (with citations) - cleaned preview:")
+
+        for i, ch in enumerate(retrieved_chunks):
+            pdf_name = ch.metadata.get("pdf_name", "unknown.pdf")
+            page_number = ch.metadata.get("page_number", "?")
+
+            # Build 1 best sentence from this single chunk
+            one_bullet = build_extractive_answer(question, [ch], max_bullets=1)[0]
+
+            # Remove "- " prefix if present, so it reads like a preview
+            clean_preview = one_bullet
+            if clean_preview.startswith("- "):
+                clean_preview = clean_preview[2:].strip()
+
+            # Remove the trailing citation like: [some.pdf p.1]
+            clean_preview = clean_preview.rsplit("[", 1)[0].strip()
+
+            # Print preview line with distance + citation
+            print(
+                f"{i+1}) [{pdf_name} p.{page_number}] (distance={ch.distance:.4f}) {clean_preview}"
+            )
+
+        # ----------------------------
+        # 2) FREE FINAL ANSWER (no LLM)
+        #    We build an extractive answer from the retrieved chunks.
+        # ----------------------------
         print("\nFinal answer (free, extractive):")
         bullets = build_extractive_answer(question, retrieved_chunks, max_bullets=5)
         for b in bullets:
