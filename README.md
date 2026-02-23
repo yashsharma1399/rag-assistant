@@ -1,6 +1,6 @@
 # RAG Research Paper Navigator (With Citations)
 
-A beginner-friendly **PDF RAG** project in Python that:
+A **PDF RAG** project in Python that:
 - Ingests research PDFs (page-wise extraction)
 - Splits text into overlapping chunks
 - Builds **local embeddings** (SentenceTransformers)
@@ -10,4 +10,5 @@ A beginner-friendly **PDF RAG** project in Python that:
 - Includes a clean **Streamlit UI** + CLI
 
 ---
+
 
